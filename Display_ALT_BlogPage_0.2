@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.2
+// @version        0.1
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*

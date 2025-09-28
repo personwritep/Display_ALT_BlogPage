@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.1
+// @version        0.2
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*
@@ -17,9 +17,8 @@
 let adisp=
     '<div class="alt_disp"><span ></span>'+
     '<style>'+
-    '.alt_disp { position: absolute; z-index: 1999; font: normal 14px/16px Meiryo; '+
-    'padding: 3px 6px 1px; color: #000; border: 1px solid #aaa; background: #fff; '+
-    'opacity: 0; }'+
+    '.alt_disp { position: absolute; z-index: -2; font: normal 14px/16px Meiryo; '+
+    'padding: 3px 6px 1px; color: #000; border: 1px solid #aaa; background: #fff; }'+
     '</style></div>';
 
 if(!document.querySelector('.alt_disp')){
@@ -47,18 +46,22 @@ function disp(pelement){
         alt_disp_span.textContent=alt_text;
         alt_disp.style.left=pos_x+'px';
         alt_disp.style.top=pos_y+'px';
-        alt_disp.style.opacity='1';
+        alt_disp.style.zIndex='1999';
 
-        disp_keep(pelement, alt_disp);
+        disp_keep(alt_disp);
         disp_out(pelement, alt_disp); }}
 
 
 
 function disp_out(pelem, alt_disp){
     pelem.onmouseleave=()=>{
-        alt_disp.style.opacity='0'; }}
+        alt_disp.style.zIndex='-2'; }
+    pelem.onmouseover=()=>{
+        alt_disp.style.zIndex='1999'; }}
 
 
-function disp_keep(pelem, alt_disp){
+function disp_keep(alt_disp){
     alt_disp.onmouseover=()=>{
-        alt_disp.style.opacity='1'; }}
+        alt_disp.style.zIndex='1999'; }
+    alt_disp.onmouseleave=()=>{
+        alt_disp.style.zIndex='-2'; }}

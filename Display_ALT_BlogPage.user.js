@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.2
+// @version        0.3
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*
@@ -13,7 +13,7 @@
 // ==/UserScript==
 
 
-let active=1;
+let active; // ツール機能の有効・無効のフラグ
 
 let target=document.querySelector('head');
 let monitor=new MutationObserver(env_check);
@@ -27,7 +27,10 @@ function env_check(){
        path.includes('/theme') || path.includes('/amemberentrylist')){ // 機能しない画面
         active=0; }
     else{
-        active=1; }}
+        active=is_my_bog();
+        gif_mark(); }
+
+    check_control(); }
 
 
 
@@ -38,6 +41,12 @@ let adisp=
     'padding: 3px 6px 1px; color: #000; border: 1px solid #aaa; background: #fff; '+
     'display: none; }'+
     '.articleText { overflow: visible; }'+ // 旧タイプスキンで赤マーク欠けを補償
+    '._2oLD75lf ._3qMawLFY, ._2oLD75lf ._yJawvjg2 { '+
+    'box-shadow: inset 0 6px #fff, inset 8px -6px #fff, inset 24px 0 #cbe8ef; } '+
+    '._2oLD75lf.active ._3qMawLFY, ._2oLD75lf.active ._yJawvjg2 { '+
+    'box-shadow: inset 0 6px #fff, inset 8px -6px #fff, inset 24px 0 red; } '+
+    '._2oLD75lf.active_me ._3qMawLFY, ._2oLD75lf.active_me ._yJawvjg2 { '+
+    'box-shadow: inset 0 6px #fff, inset 8px -6px #fff, inset 24px 0 #56caff; } '+
     '</style></div>';
 
 if(!document.querySelector('.alt_disp')){
@@ -75,20 +84,31 @@ function disp_out(pelem, alt_disp){
     pelem.onmouseleave=()=>{
         alt_disp.style.display='none'; }
     pelem.onmouseover=()=>{
-        alt_disp.style.display='block'; }
+        if(active==1){
+            alt_disp.style.display='block'; }}
     alt_disp.onmouseover=()=>{
-        alt_disp.style.display='block'; }
+        if(active==1){
+            alt_disp.style.display='block'; }}
     alt_disp.onmouseleave=()=>{
         alt_disp.style.display='none'; }}
 
 
 
-/* ======= 代替テキストの無いGif画像に赤マークを表示 ======== */
-/* 🔴🔴 この機能が不要の場合は 以下のコードを全て削除してください      */
+function is_my_bog(){
+    let userID=location.pathname.split('/')[1];
 
+    let Luser=document.querySelector('._w6MHwCAy');
+    if(Luser){
+        let LuserID=Luser.textContent;
+        if(LuserID==userID){
+            return 1; }
+        else{
+            return 0; }}
+    else{
+        return 0; }
 
-window.onscroll=()=>{
-    gif_mark(); }
+} // is_my_bog()
+
 
 
 function gif_mark(){
@@ -96,9 +116,49 @@ function gif_mark(){
     for(let k=0; k<imgall.length; k++){
         let src=imgall[k].getAttribute('src');
         if(src && src.includes('.gif')){
-            if(imgall[k].getAttribute('alt')==''){
+            if(imgall[k].getAttribute('alt')=='' || imgall[k].getAttribute('alt')==null){
                 let root=imgall[k].closest('.ogpCard_root');
-                if(root){
-                    root.style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }
+                if(active==1){
+                    if(root){
+                        root.style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }
+                    else{
+                        imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}}}}
+
+} // gif_mark()
+
+
+
+
+function check_control(){
+    let ssa=sessionStorage.getItem('DALT_BP');
+    if(ssa){
+        active=ssa; }
+
+    let b_class='active';
+    if(1==is_my_bog()){
+        b_class='active_me'; }
+
+    let login_button=document.querySelector('._2oLD75lf');
+    if(login_button){
+        if(active==1){
+            login_button.classList.add(b_class); }
+        else{
+            login_button.classList.remove(b_class); }
+
+        login_button.onclick=(event)=>{
+            if(event.ctrlKey){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                if(active==0){
+                    active=1;
+                    login_button.classList.add(b_class); }
                 else{
-                    imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}}}}
+                    active=0;
+                    login_button.classList.remove(b_class); }
+
+                sessionStorage.setItem('DALT_BP', active);
+            }}}
+
+} // check_control()
+
+

@@ -27,9 +27,7 @@ function env_check(){
        path.includes('/theme') || path.includes('/amemberentrylist')){ // 機能しない画面
         active=0; }
     else{
-        active=is_my_bog();
-        gif_mark(); }
-
+        active=is_my_bog(); }
     check_control(); }
 
 
@@ -122,10 +120,14 @@ function gif_mark(){
                     if(root){
                         root.style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }
                     else{
-                        imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}}}}
+                        imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}
+                else{
+                    if(root){
+                        root.style.boxShadow=''; }
+                    else{
+                        imgall[k].style.boxShadow=''; }}}}}
 
 } // gif_mark()
-
 
 
 
@@ -138,10 +140,12 @@ function check_control(){
     if(1==is_my_bog()){
         b_class='active_me'; }
 
+
     let login_button=document.querySelector('._2oLD75lf');
     if(login_button){
         if(active==1){
-            login_button.classList.add(b_class); }
+            login_button.classList.add(b_class);
+            gif_mark(); }
         else{
             login_button.classList.remove(b_class); }
 
@@ -157,8 +161,8 @@ function check_control(){
                     login_button.classList.remove(b_class); }
 
                 sessionStorage.setItem('DALT_BP', active);
-            }}}
+
+                gif_mark(); }}}
 
 } // check_control()
-
 

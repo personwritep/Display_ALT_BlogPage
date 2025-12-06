@@ -1,0 +1,173 @@
+// ==UserScript==
+// @name        Display ALT BlogPage
+// @namespace        http://tampermonkey.net/
+// @version        0.4
+// @description        ブログ記事の画像にマウスホバーでALTを表示
+// @author        Ameba Blog User
+// @match        https://ameblo.jp/*
+// @exclude        https://ameblo.jp/*/image*
+// @icon        https://www.google.com/s2/favicons?sz=64&domain=ameblo.jp
+// @updateURL        https://github.com/personwritep/Display_ALT_BlogPage/raw/main/Display_ALT_BlogPage.user.js
+// @downloadURL        https://github.com/personwritep/Display_ALT_BlogPage/raw/main/Display_ALT_BlogPage.user.js
+// @grant        none
+// ==/UserScript==
+
+
+let active; // ツール機能の有効・無効のフラグ
+
+let target=document.querySelector('head');
+let monitor=new MutationObserver(env_check);
+monitor.observe(target, { childList: true });
+
+env_check();
+
+function env_check(){
+    let path=location.pathname;
+    if(path.includes('/entrylist') || path.includes('/archive') ||
+       path.includes('/theme') || path.includes('/amemberentrylist')){ // 機能しない画面
+        active=0; }
+    else{
+        active=is_my_bog(); }
+    check_control(); }
+
+
+
+let adisp=
+    '<div class="alt_disp"><span ></span>'+
+    '<style>'+
+    '.alt_disp { position: absolute; z-index: 1999; font: normal 14px/16px Meiryo; '+
+    'padding: 3px 6px 1px; color: #000; border: 1px solid #aaa; background: #fff; '+
+    'display: none; }'+
+    '.articleText { overflow: visible; }'+ // 旧タイプスキンで赤マーク欠けを補償
+    '._2oLD75lf ._3qMawLFY, ._2oLD75lf ._yJawvjg2 { '+
+    'box-shadow: inset 0 6px #fff, inset 8px -6px #fff, inset 24px 0 #cbe8ef; } '+
+    '._2oLD75lf.active ._3qMawLFY, ._2oLD75lf.active ._yJawvjg2 { '+
+    'box-shadow: inset 0 6px #fff, inset 8px -6px #fff, inset 24px 0 red; } '+
+    '._2oLD75lf.active_me ._3qMawLFY, ._2oLD75lf.active_me ._yJawvjg2 { '+
+    'box-shadow: inset 0 6px #fff, inset 8px -6px #fff, inset 24px 0 #56caff; } '+
+    '</style></div>';
+
+if(!document.querySelector('.alt_disp')){
+    document.body.insertAdjacentHTML('beforeend', adisp); }
+
+
+
+document.addEventListener('mouseover', function(event) {
+    let pelement=event.target;
+    if(pelement.tagName=='IMG' && active==1){
+        disp(pelement); }});
+
+
+
+function disp(pelement){
+    let scroll_html=document.documentElement;
+    let spos_y=scroll_html.scrollTop;
+    let pos_x=pelement.getBoundingClientRect().left+4;
+    let pos_y=pelement.getBoundingClientRect().top+spos_y+2;
+
+    let alt_disp=document.querySelector('.alt_disp');
+    let alt_disp_span=document.querySelector('.alt_disp span');
+    let alt_text=pelement.getAttribute('alt');
+    if(alt_text && alt_disp && alt_disp_span){
+        let body=document.body;
+        let zoom_f=window.getComputedStyle(body).getPropertyValue('zoom');
+        if(!zoom_f){
+            zoom_f=1; } // 拡大ツールがない環境の場合
+
+        alt_disp_span.textContent=alt_text;
+        alt_disp.style.left=pos_x/zoom_f+'px';
+        alt_disp.style.top=pos_y/zoom_f+'px';
+        alt_disp.style.display='block';
+
+        disp_out(pelement, alt_disp); }}
+
+
+
+function disp_out(pelem, alt_disp){
+    pelem.onmouseleave=()=>{
+        alt_disp.style.display='none'; }
+    pelem.onmouseover=()=>{
+        if(active==1){
+            alt_disp.style.display='block'; }}
+    alt_disp.onmouseover=()=>{
+        if(active==1){
+            alt_disp.style.display='block'; }}
+    alt_disp.onmouseleave=()=>{
+        alt_disp.style.display='none'; }}
+
+
+
+function is_my_bog(){
+    let userID=location.pathname.split('/')[1];
+
+    let Luser=document.querySelector('._w6MHwCAy');
+    if(Luser){
+        let LuserID=Luser.textContent;
+        if(LuserID==userID){
+            return 1; }
+        else{
+            return 0; }}
+    else{
+        return 0; }
+
+} // is_my_bog()
+
+
+
+function no_alt(){
+    let imgall=document.querySelectorAll('#entryBody img');
+    for(let k=0; k<imgall.length; k++){
+        let src=imgall[k].getAttribute('src');
+        if(src){
+            if(src.includes('.jpg') || src.includes('.gif') || src.includes('.png')){
+                if(imgall[k].getAttribute('alt')=='' || imgall[k].getAttribute('alt')==null){
+                    let root=imgall[k].closest('.ogpCard_root');
+                    if(active==1){
+                        if(root){
+                            root.style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }
+                        else{
+                            imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}
+                    else{
+                        if(root){
+                            root.style.boxShadow=''; }
+                        else{
+                            imgall[k].style.boxShadow=''; }}}}}}
+
+} // no_alt()
+
+
+
+function check_control(){
+    let ssa=sessionStorage.getItem('DALT_BP');
+    if(ssa){
+        active=ssa; }
+
+    let b_class='active';
+    if(1==is_my_bog()){
+        b_class='active_me'; }
+
+
+    let login_button=document.querySelector('._2oLD75lf');
+    if(login_button){
+        if(active==1){
+            login_button.classList.add(b_class);
+            no_alt(); }
+        else{
+            login_button.classList.remove(b_class); }
+
+        login_button.onclick=(event)=>{
+            if(event.ctrlKey){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                if(active==0){
+                    active=1;
+                    login_button.classList.add(b_class); }
+                else{
+                    active=0;
+                    login_button.classList.remove(b_class); }
+
+                sessionStorage.setItem('DALT_BP', active);
+
+                no_alt(); }}}
+
+} // check_control()

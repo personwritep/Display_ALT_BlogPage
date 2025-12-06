@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.3
+// @version        0.4
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*
@@ -69,9 +69,14 @@ function disp(pelement){
     let alt_disp_span=document.querySelector('.alt_disp span');
     let alt_text=pelement.getAttribute('alt');
     if(alt_text && alt_disp && alt_disp_span){
+        let body=document.body;
+        let zoom_f=window.getComputedStyle(body).getPropertyValue('zoom');
+        if(!zoom_f){
+            zoom_f=1; } // 拡大ツールがない環境の場合
+
         alt_disp_span.textContent=alt_text;
-        alt_disp.style.left=pos_x+'px';
-        alt_disp.style.top=pos_y+'px';
+        alt_disp.style.left=pos_x/zoom_f+'px';
+        alt_disp.style.top=pos_y/zoom_f+'px';
         alt_disp.style.display='block';
 
         disp_out(pelement, alt_disp); }}
@@ -109,25 +114,26 @@ function is_my_bog(){
 
 
 
-function gif_mark(){
+function no_alt(){
     let imgall=document.querySelectorAll('#entryBody img');
     for(let k=0; k<imgall.length; k++){
         let src=imgall[k].getAttribute('src');
-        if(src && src.includes('.gif')){
-            if(imgall[k].getAttribute('alt')=='' || imgall[k].getAttribute('alt')==null){
-                let root=imgall[k].closest('.ogpCard_root');
-                if(active==1){
-                    if(root){
-                        root.style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }
+        if(src){
+            if(src.includes('.jpg') || src.includes('.gif') || src.includes('.png')){
+                if(imgall[k].getAttribute('alt')=='' || imgall[k].getAttribute('alt')==null){
+                    let root=imgall[k].closest('.ogpCard_root');
+                    if(active==1){
+                        if(root){
+                            root.style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }
+                        else{
+                            imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}
                     else{
-                        imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}
-                else{
-                    if(root){
-                        root.style.boxShadow=''; }
-                    else{
-                        imgall[k].style.boxShadow=''; }}}}}
+                        if(root){
+                            root.style.boxShadow=''; }
+                        else{
+                            imgall[k].style.boxShadow=''; }}}}}}
 
-} // gif_mark()
+} // no_alt()
 
 
 
@@ -145,7 +151,7 @@ function check_control(){
     if(login_button){
         if(active==1){
             login_button.classList.add(b_class);
-            gif_mark(); }
+            no_alt(); }
         else{
             login_button.classList.remove(b_class); }
 
@@ -162,7 +168,6 @@ function check_control(){
 
                 sessionStorage.setItem('DALT_BP', active);
 
-                gif_mark(); }}}
+                no_alt(); }}}
 
 } // check_control()
-

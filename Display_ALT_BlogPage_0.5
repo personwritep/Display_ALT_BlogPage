@@ -132,8 +132,8 @@ function no_alt(){
     let imgall=document.querySelectorAll('#entryBody img');
     for(let k=0; k<imgall.length; k++){
         if(imgall[k].getAttribute('alt')=='' || imgall[k].getAttribute('alt')==null){
-            let ogp=imgall[k].closest('.ogpCard_root');
-            let pick=imgall[k].closest('.pickCreative_root');
+            let ogp=imgall[k].closest('.ogpCard_link');
+            let pick=imgall[k].closest('.pickCreative');
             if(active==1){
                 if(ogp || pick){ ; }
                 else{

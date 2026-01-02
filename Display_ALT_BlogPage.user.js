@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.5
+// @version        0.6
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*
@@ -69,11 +69,16 @@ function set_env(){
 document.addEventListener('mouseover', function(event) {
     let pelement=event.target;
     if(pelement.tagName=='IMG' && active==1){
-        disp(pelement); }});
+        disp(pelement, 'i'); }
+    else if(pelement.tagName=='A' && active==1){
+        if(pelement.classList.contains('skinArticleTitle')){ // 新・旧タイプスキン
+            disp(pelement, 'h'); }
+        else if(pelement.parentElement.classList.contains('title')){ // レトロタイプスキン
+            disp(pelement, 'h'); }}});
 
 
 
-function disp(pelement){
+function disp(pelement, type){
     let scroll_html=document.documentElement;
     let spos_y=scroll_html.scrollTop;
     let pos_x=pelement.getBoundingClientRect().left+4;
@@ -81,33 +86,68 @@ function disp(pelement){
 
     let alt_disp=document.querySelector('.alt_disp');
     let alt_disp_span=document.querySelector('.alt_disp span');
-    let alt_text=pelement.getAttribute('alt');
-    if(alt_text && alt_disp && alt_disp_span){
+    if(alt_disp && alt_disp_span){
         let body=document.body;
         let zoom_f=window.getComputedStyle(body).getPropertyValue('zoom');
         if(!zoom_f){
             zoom_f=1; } // 拡大ツールがない環境の場合
 
-        alt_disp_span.textContent=alt_text;
-        alt_disp.style.left=pos_x/zoom_f+'px';
-        alt_disp.style.top=pos_y/zoom_f+'px';
-        alt_disp.style.display='block';
+        if(type=='i'){
+            let alt_text=pelement.getAttribute('alt');
+            if(alt_text){
+                alt_disp_span.textContent=alt_text;
+                alt_disp.style.left=pos_x/zoom_f+'px';
+                alt_disp.style.top=pos_y/zoom_f+'px';
+                alt_disp.style.display='block';
 
-        disp_out(pelement, alt_disp); }}
+                disp_out(pelement, alt_disp); }}
+
+        else if(type=='h'){
+            let title_text;
+            let title_r;
+            let title_b;
+            let title=document.querySelector('head title');
+            if(title){
+                title_r=title.textContent.split(' | ')[0];
+                title_b=pelement.textContent;
+                if(title_r && title_b && title_r!=title_b){
+                    title_text=title_r;
+                    alt_disp_span.textContent=title_text;
+                    alt_disp.style.left=pos_x/zoom_f+'px';
+                    alt_disp.style.top=(pos_y/zoom_f - 25)+'px';
+                    alt_disp.style.display='block';
+
+                    disp_out(pelement, alt_disp); }}}
+
+    }} // disp(pelement, type)
 
 
 
 function disp_out(pelem, alt_disp){
     pelem.onmouseleave=()=>{
         alt_disp.style.display='none'; }
-    pelem.onmouseover=()=>{
-        if(active==1){
-            alt_disp.style.display='block'; }}
+
     alt_disp.onmouseover=()=>{
         if(active==1){
             alt_disp.style.display='block'; }}
+
     alt_disp.onmouseleave=()=>{
         alt_disp.style.display='none'; }}
+
+
+
+function skin_type(){
+    let htm=document.documentElement;
+    let skin_code=htm.getAttribute('data-base-skin-code');
+    if(skin_code){
+        if(skin_code=="uranus"){ // 新タイプ
+            return 0; }
+        else if(skin_code=="new"){ // 旧タイプ
+            return 1; }
+        else if(skin_code=="default"){ // レトロタイプ
+            return 2; }}
+
+} // skin_type()
 
 
 
@@ -137,7 +177,10 @@ function no_alt(){
             if(active==1){
                 if(ogp || pick){ ; }
                 else{
-                    imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}
+                    if(skin_type()==2){
+                        imgall[k].style.boxShadow='0 6px 0 red'; }
+                    else{
+                        imgall[k].style.boxShadow='-2px 0 0 #fff, -15px 0 0 red'; }}}
             else{
                 imgall[k].style.boxShadow=''; }}}
 

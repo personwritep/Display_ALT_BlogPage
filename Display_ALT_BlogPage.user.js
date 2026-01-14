@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.6
+// @version        0.7
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*
@@ -50,14 +50,14 @@ function set_env(){
     let sw=
         '<button class="alt_sw"></button>'+
         '<style>'+
-        '._2oLD75lf { position: relative; }'+
+        '._t7_ywGCi { position: relative; }'+
         '.alt_sw { position: absolute; top: 8px; left: 8px; width: 14px; height: 25px; '+
         'border: none; background: #cbe8ef; }'+
         '.alt_sw.active { background: red; }'+
         '.alt_sw.active_me { background: #56caff; }'+
         '</style>';
 
-    let login_menu=document.querySelector('._3qMawLFY'); // ログインしないと無効
+    let login_menu=document.querySelector('._2g4ltB70'); // ログインしないと無効
     if(login_menu){
         if(!document.querySelector('.alt_sw')){
             login_menu.insertAdjacentHTML('beforebegin', sw); }}
@@ -108,16 +108,32 @@ function disp(pelement, type){
             let title_b;
             let title=document.querySelector('head title');
             if(title){
-                title_r=title.textContent.split(' | ')[0];
-                title_b=pelement.textContent;
-                if(title_r && title_b && title_r!=title_b){
-                    title_text=title_r;
-                    alt_disp_span.textContent=title_text;
+                if(is_entry()){
+                    title_r=title.textContent.split(' | ')[0];
+                    title_b=pelement.textContent;
+                    if(title_r && title_b && title_r!=title_b){
+                        title_text=title_r;
+                        alt_disp_span.textContent=title_text;
+                        alt_disp.style.left=pos_x/zoom_f+'px';
+                        alt_disp.style.top=(pos_y/zoom_f - 25)+'px';
+                        alt_disp.style.display='block';
+
+                        disp_out(pelement, alt_disp); }}
+                else{
+                    alt_disp_span.textContent='❓';
                     alt_disp.style.left=pos_x/zoom_f+'px';
                     alt_disp.style.top=(pos_y/zoom_f - 25)+'px';
                     alt_disp.style.display='block';
 
                     disp_out(pelement, alt_disp); }}}
+
+
+        function is_entry(){
+            let url=location.href;
+            if(url.includes('/entry-')){
+                return true; }
+            else{
+                return false; }}
 
     }} // disp(pelement, type)
 
@@ -154,7 +170,7 @@ function skin_type(){
 function is_my_bog(){
     let userID=location.pathname.split('/')[1];
 
-    let Luser=document.querySelector('._w6MHwCAy');
+    let Luser=document.querySelector('._2j4IoOdR');
     if(Luser){
         let LuserID=Luser.textContent;
         if(LuserID==userID){

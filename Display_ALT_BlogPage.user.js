@@ -50,14 +50,14 @@ function set_env(){
     let sw=
         '<button class="alt_sw"></button>'+
         '<style>'+
-        '._t7_ywGCi { position: relative; }'+
+        '._dXNsNzyk { position: relative; }'+
         '.alt_sw { position: absolute; top: 8px; left: 8px; width: 14px; height: 25px; '+
         'border: none; background: #cbe8ef; }'+
         '.alt_sw.active { background: red; }'+
         '.alt_sw.active_me { background: #56caff; }'+
         '</style>';
 
-    let login_menu=document.querySelector('._2g4ltB70'); // ログインしないと無効
+    let login_menu=document.querySelector('._cYUCZzXl'); // ログインしないと無効
     if(login_menu){
         if(!document.querySelector('.alt_sw')){
             login_menu.insertAdjacentHTML('beforebegin', sw); }}
@@ -170,7 +170,7 @@ function skin_type(){
 function is_my_bog(){
     let userID=location.pathname.split('/')[1];
 
-    let Luser=document.querySelector('._2j4IoOdR');
+    let Luser=document.querySelector('._5eamczd_');
     if(Luser){
         let LuserID=Luser.textContent;
         if(LuserID==userID){
@@ -179,7 +179,6 @@ function is_my_bog(){
             return 0; }}
     else{
         return 0; }
-
 } // is_my_bog()
 
 

@@ -132,6 +132,8 @@ function disp(pelement, type){
             let url=location.href;
             if(url.includes('/entry-')){
                 return true; }
+            else if(url.includes('/amemberentry-')){
+                return true; }
             else{
                 return false; }}
 

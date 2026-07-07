@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name        Display ALT BlogPage
 // @namespace        http://tampermonkey.net/
-// @version        0.7
+// @version        0.8
 // @description        ブログ記事の画像にマウスホバーでALTを表示
 // @author        Ameba Blog User
 // @match        https://ameblo.jp/*
 // @exclude        https://ameblo.jp/*/image*
+// @noframes
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=ameblo.jp
 // @updateURL        https://github.com/personwritep/Display_ALT_BlogPage/raw/main/Display_ALT_BlogPage.user.js
 // @downloadURL        https://github.com/personwritep/Display_ALT_BlogPage/raw/main/Display_ALT_BlogPage.user.js
